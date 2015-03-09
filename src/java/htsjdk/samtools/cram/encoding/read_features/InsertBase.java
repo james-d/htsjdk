@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2013 EMBL-EBI
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,63 +17,61 @@ package htsjdk.samtools.cram.encoding.read_features;
 
 import java.io.Serializable;
 
+/**
+ * A read feature representing a single insert base.
+ */
 public class InsertBase implements Serializable, ReadFeature {
 
-	private int position;
-	private byte base;
-	public static final byte operator = 'i';
+    private int position;
+    private byte base;
+    public static final byte operator = 'i';
 
-	public InsertBase() {
-	}
+    public InsertBase() {
+    }
 
-	public InsertBase(int position, byte base) {
-		this.position = position;
-		this.base = base;
-	}
+    public InsertBase(final int position, final byte base) {
+        this.position = position;
+        this.base = base;
+    }
 
 
-	@Override
-	public byte getOperator() {
-		return operator;
-	}
+    @Override
+    public byte getOperator() {
+        return operator;
+    }
 
-	public int getPosition() {
-		return position;
-	}
+    public int getPosition() {
+        return position;
+    }
 
-	public void setPosition(int position) {
-		this.position = position;
-	}
+    public void setPosition(final int position) {
+        this.position = position;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof InsertBase))
-			return false;
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof InsertBase))
+            return false;
 
-		InsertBase v = (InsertBase) obj;
+        final InsertBase v = (InsertBase) obj;
 
-		if (position != v.position)
-			return false;
+        return position == v.position && base == v.base;
 
-		if (base != v.base)
-			return false;
+    }
 
-		return true;
-	}
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder().append((char) operator).append('@');
+        sb.append(position);
+        sb.append('\\').appendCodePoint(base);
+        return sb.toString();
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer().append((char)operator).append('@');
-		sb.append(position);
-		sb.append('\\').appendCodePoint(base);
-		return sb.toString();
-	}
+    public byte getBase() {
+        return base;
+    }
 
-	public byte getBase() {
-		return base;
-	}
-
-	public void setBase(byte base) {
-		this.base = base;
-	}
+    public void setBase(final byte base) {
+        this.base = base;
+    }
 }

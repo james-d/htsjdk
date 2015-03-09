@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2013 EMBL-EBI
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,93 +16,106 @@
 package htsjdk.samtools.cram.structure;
 
 import htsjdk.samtools.SAMFileHeader;
+import htsjdk.samtools.cram.common.Version;
 
 import java.util.Arrays;
 
+/**
+ * A starting object when dealing with CRAM files. A {@link CramHeader} holds 2 things: 1. File format definition, including content id and
+ * version information 2. SAM file header
+ */
 public final class CramHeader {
+    public static final byte[] magic = "CRAM".getBytes();
 
-	public static final byte[] magick = "CRAM".getBytes();
-	private byte majorVersion;
-	private byte minorVersion;
-	public final byte[] id = new byte[20];
-	{
-		Arrays.fill(id, (byte) 0);
-	}
+    private Version version;
+    private final byte[] id = new byte[20];
 
-	private SAMFileHeader samFileHeader;
+    {
+        Arrays.fill(id, (byte) 0);
+    }
 
-	public CramHeader() {
-	}
+    private SAMFileHeader samFileHeader;
 
-	public CramHeader(int majorVersion, int minorVersion, String id,
-			SAMFileHeader samFileHeader) {
-		this.majorVersion = (byte) majorVersion;
-		this.minorVersion = (byte) minorVersion;
-		if (id != null)
-			System.arraycopy(id.getBytes(), 0, this.id, 0,
-					Math.min(id.length(), this.id.length));
-		this.samFileHeader = samFileHeader;
-	}
+    /**
+     * Create a new {@link CramHeader} empty object.
+     */
+    private CramHeader() {
+    }
 
-	public void setID(String stringID) {
-		System.arraycopy(stringID.getBytes(), 0, this.id, 0,
-				Math.min(this.id.length, stringID.length()));
-	}
+    /**
+     * Create a new {@link CramHeader} object with the specified version, id and SAM file header.
+     * The id field by default is guaranteed to be byte[20].
+     *
+     * @param version       the CRAM version to assume
+     * @param id            an identifier of the content associated with this header
+     * @param samFileHeader the SAM file header
+     */
+    public CramHeader(final Version version, final String id, final SAMFileHeader samFileHeader) {
+        this.version = version;
 
-	@Override
-	public CramHeader clone() {
-		CramHeader clone = new CramHeader();
-		clone.majorVersion = majorVersion;
-		clone.minorVersion = minorVersion;
-		System.arraycopy(id, 0, clone.id, 0, id.length);
-		clone.samFileHeader = getSamFileHeader().clone();
+        if (id != null) System.arraycopy(id.getBytes(), 0, this.id, 0, Math.min(id.length(), this.id.length));
+        this.samFileHeader = samFileHeader;
+    }
 
-		return clone;
-	}
+    /**
+     * Set the id of the header. A typical use is for example file name to be used when streaming or a checksum of the data contained in the
+     * file.
+     *
+     * @param stringID a new id; only first 20 bytes from byte representation of java {@link String} will be used.
+     */
+    public void setID(final String stringID) {
+        System.arraycopy(stringID.getBytes(), 0, this.id, 0, Math.min(this.id.length, stringID.length()));
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (!(obj instanceof CramHeader))
-			return false;
+    /**
+     * Copy the CRAM header into a new {@link CramHeader} object.
+     * @return a complete copy of the header
+     */
+    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @Override
+    public CramHeader clone() {
+        final CramHeader clone = new CramHeader();
+        clone.version = version;
+        System.arraycopy(id, 0, clone.id, 0, id.length);
+        clone.samFileHeader = getSamFileHeader().clone();
 
-		CramHeader h = (CramHeader) obj;
+        return clone;
+    }
 
-		if (getMajorVersion() != h.getMajorVersion())
-			return false;
-		if (getMinorVersion() != h.getMinorVersion())
-			return false;
-		if (!Arrays.equals(id, h.id))
-			return false;
-		return getSamFileHeader().equals(h.getSamFileHeader());
-	}
 
-	public byte getMajorVersion() {
-		return majorVersion;
-	}
+    /**
+     * Checks if content of a header is the same as this one.
+     * @param obj another header to compare to
+     * @return true if versions, ids and SAM file header are exactly the same, false otherwise
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof CramHeader)) return false;
 
-	public void setMajorVersion(byte majorVersion) {
-		this.majorVersion = majorVersion;
-	}
+        final CramHeader h = (CramHeader) obj;
 
-	public byte getMinorVersion() {
-		return minorVersion;
-	}
+        if (getVersion().major != h.getVersion().major) return false;
+        //noinspection SimplifiableIfStatement
+        if (getVersion().minor != h.getVersion().minor) return false;
+        return Arrays.equals(id, h.id) && getSamFileHeader().equals(h.getSamFileHeader());
+    }
 
-	public void setMinorVersion(byte minorVersion) {
-		this.minorVersion = minorVersion;
-	}
+    /**
+     * Get the {@link SAMFileHeader} object associated with this CRAM file header.
+     * @return the SAM file header
+     */
+    public SAMFileHeader getSamFileHeader() {
+        return samFileHeader;
+    }
 
-	public SAMFileHeader getSamFileHeader() {
-		return samFileHeader;
-	}
+    public byte[] getId() {
+        return id;
+    }
 
-	public void setSamFileHeader(SAMFileHeader samFileHeader) {
-		this.samFileHeader = samFileHeader;
-	}
+    public Version getVersion() {
+        return version;
+    }
 
-	public byte[] getId() {
-		return id;
-	}
+    public void setVersion(final Version version) { this.version = version; }
 }
