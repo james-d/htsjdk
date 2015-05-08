@@ -62,6 +62,8 @@ public class CramIO {
      */
     public static final byte[] ZERO_F_EOF_MARKER = bytesFromHex("0f 00 00 00 ff ff ff ff 0f e0 45 4f 46 00 00 00 00 01 00 05 bd d9 4f 00 01 00 " +
             "" + "06 06 01 00 01 00 01 00 ee 63 01 4b");
+
+
     private static final int DEFINITION_LENGTH = 4 + 1 + 1 + 20;
     private static final Log log = Log.getInstance(CramIO.class);
 
@@ -87,8 +89,6 @@ public class CramIO {
         if (version.compatibleWith(CramVersions.CRAM_v3)) {
             outputStream.write(ZERO_F_EOF_MARKER);
             return ZERO_F_EOF_MARKER.length;
-        if (version.compatibleWith(CramVersions.CRAM_v2_1)) {
-            outputStream.write(ZERO_B_EOF_MARKER);
         }
 
         if (version.compatibleWith(CramVersions.CRAM_v2_1)) {
@@ -96,8 +96,6 @@ public class CramIO {
             return ZERO_B_EOF_MARKER.length;
         }
         return 0;
-    }
-    private static boolean streamEndsWith(SeekableStream seekableStream, byte[] marker) throws IOException {
     }
 
     private static boolean streamEndsWith(final SeekableStream seekableStream, final byte[] marker) throws IOException {
@@ -121,7 +119,6 @@ public class CramIO {
      */
     @SuppressWarnings("SimplifiableIfStatement")
     private static boolean checkEOF(final Version version, final SeekableStream seekableStream) throws IOException {
-
 
         if (version.compatibleWith(CramVersions.CRAM_v3)) return streamEndsWith(seekableStream, ZERO_B_EOF_MARKER);
         if (version.compatibleWith(CramVersions.CRAM_v2_1)) return streamEndsWith(seekableStream, ZERO_F_EOF_MARKER);
@@ -188,7 +185,9 @@ public class CramIO {
      */
     public static CramHeader readCramHeader(final InputStream is) throws IOException {
         final CramHeader header = readFormatDefinition(is);
+
         final SAMFileHeader samFileHeader = readSAMFileHeader(header.getVersion(), is, new String (header.getId()));
+
         return new CramHeader(header.getVersion(), new String (header.getId()), samFileHeader);
     }
 
@@ -266,8 +265,6 @@ public class CramIO {
                 b = Block.readFromInputStream(version.major, is);
             }
         }
-            }
-        }
 
         is = new ByteArrayInputStream(b.getRawContent());
 
@@ -313,8 +310,7 @@ public class CramIO {
             log.error("Failed to replace CRAM header because the new header does not fit.");
             return false;
         }
-        raf.seek(pos);
-        raf.write(baos.getBuffer(), 0, baos.size());
+        final RandomAccessFile raf = new RandomAccessFile(file, "rw");
         raf.seek(pos);
         raf.write(baos.getBuffer(), 0, baos.size());
         raf.close();

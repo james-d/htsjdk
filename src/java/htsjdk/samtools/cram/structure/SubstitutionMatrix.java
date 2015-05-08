@@ -57,9 +57,7 @@ public class SubstitutionMatrix {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-    }
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
+        for (final byte r : "ACGTN".getBytes()) {
             sb.append((char) r);
             sb.append(":");
             for (int i = 0; i < 4; i++) {

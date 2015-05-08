@@ -65,12 +65,6 @@ class ContainerHeaderIO {
     public int writeContainerHeader(final int major, final Container c, final OutputStream os)
             throws IOException {
         final CRC32_OutputStream cos = new CRC32_OutputStream(os);
-        len += LTF8.writeUnsignedLTF8(c.bases, cos);
-        len += ITF8.writeUnsignedITF8(c.blockCount, cos);
-        len += CramArray.write(c.landmarks, cos);
-
-        os.write(cos.getCrc32_LittleEndian());
-        len += 4;
 
         int len = (CramInt.writeInt32(c.containerByteSize, cos)+7)/8;
         len += (ITF8.writeUnsignedITF8(c.sequenceId, cos)+7)/8;

@@ -86,17 +86,7 @@ class SliceIO {
         CramArray.write(s.contentIDs, baos);
         ITF8.writeUnsignedITF8(s.embeddedRefBlockContentID, baos);
         baos.write(s.refMD5 == null ? new byte[16] : s.refMD5);
-        if (major >= CramVersions.CRAM_v3.major) {
-                BinaryTagCodec tc = new BinaryTagCodec(bc);
-                SAMBinaryTagAndValue tv = s.sliceTags;
-                do {
-                    log.debug("Writing slice tag: " + SAMTagUtil.getSingleton().makeStringTag(tv.tag));
-                    tc.writeTag(tv.tag, tv.value, tv.isUnsignedArray());
-                } while ((tv = tv.getNext()) != null);
-                // BinaryCodec doesn't seem to cache things.
-                // In any case, not calling bc.close() because it's behaviour is
-                // irrelevant here.
-            }
+
         if (major >= CramVersions.CRAM_v3.major) {
             if (s.sliceTags != null) {
                 final BinaryCodec bc = new BinaryCodec(baos);

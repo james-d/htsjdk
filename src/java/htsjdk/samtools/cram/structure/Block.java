@@ -85,15 +85,6 @@ public class Block {
         block.compressedContentSize = ITF8.readUnsignedITF8(is);
         block.rawContentSize = ITF8.readUnsignedITF8(is);
 
-        block.setContentId(ITF8.readUnsignedITF8(is));
-        block.compressedContentSize = ITF8.readUnsignedITF8(is);
-        block.rawContentSize = ITF8.readUnsignedITF8(is);
-            final int actualChecksum = ((CRC32_InputStream) is).getCRC32();
-            final int checksum = CramInt.int32(is);
-            if (checksum != actualChecksum)
-                throw new RuntimeException(String.format("Block CRC32 mismatch: %04x vs %04x", checksum, actualChecksum));
-        }
-
         block.compressedContent = new byte[block.compressedContentSize];
         InputStreamUtils.readFully(is, block.compressedContent, 0, block.compressedContent.length);
         if (v3_orHigher) {
@@ -105,14 +96,6 @@ public class Block {
 
         block.uncompress();
         return block;
-    }
-     *
-     * @param rawContent the content of the block
-     * @return a new mapped slice {@link Block} object
-     * @throws IOException as per java IO contract
-     */
-    public static Block buildNewSliceHeaderBlock(final byte[] rawContent) {
-        return new Block(BlockCompressionMethod.RAW, BlockContentType.MAPPED_SLICE, 0, rawContent);
     }
 
     /**
@@ -202,8 +185,6 @@ public class Block {
     }
 
     void setCompressedContent(final byte[] compressed) {
-    }
-
         this.compressedContent = compressed;
         compressedContentSize = compressed == null ? 0 : compressed.length;
 
@@ -273,18 +254,6 @@ public class Block {
             case RANS:
                 rawContent = ExternalCompression.unrans(compressedContent);
                 break;
-                }
-                break;
-            case LZMA:
-                try {
-                    rawContent = ExternalCompression.unxz(compressedContent);
-                } catch (final IOException e) {
-                    throw new RuntimeException("This should have never happened.", e);
-                }
-                break;
-            case RANS:
-                rawContent = ExternalCompression.unrans(compressedContent);
-                break;
             default:
                 throw new RuntimeException("Unknown block compression method: " + getMethod().name());
         }
@@ -319,9 +288,8 @@ public class Block {
         ITF8.writeUnsignedITF8(compressedContentSize, os);
         ITF8.writeUnsignedITF8(rawContentSize, os);
 
-    private void doWrite(final OutputStream os) throws IOException {
+        os.write(getCompressedContent());
     }
-        if (!isUncompressed()) uncompress();
 
     BlockCompressionMethod getMethod() {
         return method;
@@ -339,16 +307,6 @@ public class Block {
         this.contentType = contentType;
     }
 
-    public int getContentId() {
-        return contentId;
-    }
-
-    public void setContentId(final int contentId) {
-        this.contentId = contentId;
-    }
-
-    public int getCompressedContentSize() {
-        return compressedContentSize;
     public int getContentId() {
         return contentId;
     }

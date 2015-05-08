@@ -151,7 +151,6 @@ public class CRAMFileWriter extends SAMFileWriterImpl {
             refs = source.getReferenceBases(sequence, true);
             refSeqName = sequence.getSequenceName();
         }
-        }
 
         int start = SAMRecord.NO_ALIGNMENT_START;
         int stop = SAMRecord.NO_ALIGNMENT_START;
@@ -167,7 +166,6 @@ public class CRAMFileWriter extends SAMFileWriterImpl {
         ReferenceTracks tracks = null;
         if (preservation != null && preservation.areReferenceTracksRequired()) {
             tracks = new ReferenceTracks(refSeqIndex, refSeqName, refs);
-
 
             tracks.ensureRange(start, stop - start + 1);
             updateTracks(samRecords, tracks);

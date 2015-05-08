@@ -223,5 +223,4 @@ public class ContainerFactory {
     public void setPreserveReadNames(final boolean preserveReadNames) {
         this.preserveReadNames = preserveReadNames;
     }
-    public void setPreserveReadNames(final boolean preserveReadNames) {
 }

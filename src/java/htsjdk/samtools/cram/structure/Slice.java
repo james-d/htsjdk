@@ -63,7 +63,7 @@ public class Slice {
 
     public SAMBinaryTagAndValue sliceTags;
 
-        if (alignmentStart > 0 && sequenceId >= 0 && ref == null) throw new NullPointerException("Mapped slice reference is null.");
+    private void alignmentBordersSanityCheck(final byte[] ref) {
         if (alignmentStart > 0 && sequenceId >= 0 && ref == null) throw new NullPointerException("Mapped slice reference is null.");
 
         if (alignmentStart > ref.length) {
@@ -74,6 +74,7 @@ public class Slice {
 
         if (alignmentStart - 1 + alignmentSpan > ref.length) {
             log.warn(String.format("Slice partially mapped outside of reference: seqID=%d, start=%d, span=%d, counter=%d.",
+                    sequenceId, alignmentStart, alignmentSpan, globalRecordCounter));
         }
     }
 
@@ -219,21 +220,6 @@ public class Slice {
             throw new SAMException("Attribute type " + value.getClass() + " not supported. Tag: " + SAMTagUtil.getSingleton()
                     .makeStringTag(tag));
         }
-        if (value == null) {
-            if (this.sliceTags != null) this.sliceTags = this.sliceTags.remove(tag);
-        } else {
-            final SAMBinaryTagAndValue tmp;
-            if (!isUnsignedArray) {
-                tmp = new SAMBinaryTagAndValue(tag, value);
-            } else {
-                if (!value.getClass().isArray() || value instanceof float[]) {
-                    throw new SAMException("Attribute type " + value.getClass() + " cannot be encoded as an unsigned array. Tag: " +
-                            SAMTagUtil.getSingleton().makeStringTag(tag));
-                }
-                tmp = new SAMBinaryTagAndUnsignedArrayValue(tag, value);
-            }
-            if (this.sliceTags == null) this.sliceTags = tmp;
-            else this.sliceTags = this.sliceTags.insert(tmp);
         if (value == null) {
             if (this.sliceTags != null) this.sliceTags = this.sliceTags.remove(tag);
         } else {
