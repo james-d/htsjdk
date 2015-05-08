@@ -89,8 +89,6 @@ public class CRAMComplianceTest {
         if (t.refFile.exists())
             source = new ReferenceSource(t.refFile);
 
-        SamReaderFactory.setDefaultValidationStringency(ValidationStringency.SILENT);
-
         SamReader reader = SamReaderFactory.make().validationStringency(ValidationStringency.SILENT).open(t.bamFile);
 
         final SAMRecordIterator samRecordIterator = reader.iterator();
